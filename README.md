@@ -238,7 +238,6 @@ void callback(char* topic, unsigned char* payload, unsigned int length) {
 Podemos ter uma ideia melhor de seu funcionamento ao analisar o fluxograma do aplicativo:
 
 ![Fluxograma do SmartLight](https://github.com/ighor22/smartLight/blob/master/Fluxograma%20SmartLight.png)
-
 A seguir, um fluxograma especificamente para a parte da comunicação realizada pelo MQTT: 
 
 ![Fluxograma do MQTT](https://github.com/ighor22/smartLight/blob/master/Fluxograma%20MQTT.png)
