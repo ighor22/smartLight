@@ -87,8 +87,8 @@ void setup() {
     Serial.println("Conectado ao WiFi!");
     Serial.print("Meu IP:\t");
     Serial.println(WiFi.localIP());
-
-    bot.sendMessage("779161565", "Iniciando sistema!", ""); //Inicio do Bot do Telegram
+    //Substituir ***** pelo id do usuario no telegram
+    bot.sendMessage("***********", "Iniciando sistema!", ""); //Inicio do Bot do Telegram
     timeClient.begin(); //Inicio do NTP
     connectMQTTServer(); //Conexão ao servidor MQTT
     
@@ -113,22 +113,7 @@ void loop() {
  float voltage = LDR * (5.0 / 1023.0);   // Converte valor analogico (0 - 1023) para voltagem (0 - 5V)
   Serial.println(voltage);   
 
-//Verifica tempo sem movimento, nivel de claridade e horario atual. 
-if(contador >= tempoSemPresenca && voltage >1 && timeClient.getHours() >= horarioAtivacao){
-  digitalWrite(led3, HIGH); //Acende led para debug
-  //Caso não tenha enviado a mensagem, envia
-  if(msgEnviada == false){
-    Serial.println("Enviando mensagem...");
-    //Substituir **** por id do usuario telegram
-    bot.sendMessage("*******", "Você esqueceu a luz acesa! Acesse https://iknodered.mybluemix.net/ui/ para apagá-la.", "");
-    msgEnviada = true; //Define variavel global para true para não mandar mensagem novmente a cada iteração
-  }
-}
-else{
-  digitalWrite(led3, LOW); //Apaga led para debug
-}
-
-//Caso esteja escuro o ambiente, reinicia o contador
+  //Caso esteja escuro o ambiente, reinicia o contador
   if (voltage <=1){
     digitalWrite(led1, HIGH); //Acende led para debug
     contador= 0;
@@ -137,7 +122,7 @@ else{
       digitalWrite(led1, LOW); //Apaga led para debug
   }
 
-//Realiza leitura dos dados do PIR, verificando se há movimentação no ambiente
+  //Realiza leitura dos dados do PIR, verificando se há movimentação no ambiente
   long state = digitalRead(PIR);
   //Caso tenha movimentação, reinicia o contador
     if(state == HIGH) {
@@ -158,6 +143,23 @@ else{
       Serial.println(contador);
       
 }
+
+
+//Verifica tempo sem movimento, nivel de claridade e horario atual. 
+if(contador >= tempoSemPresenca && voltage >1 && timeClient.getHours() >= horarioAtivacao){
+  digitalWrite(led3, HIGH); //Acende led para debug
+  //Caso não tenha enviado a mensagem, envia
+  if(msgEnviada == false){
+    Serial.println("Enviando mensagem...");
+    //Substituir **** por id do usuario telegram
+    bot.sendMessage("*******", "Você esqueceu a luz acesa! Acesse https://iknodered.mybluemix.net/ui/ para apagá-la.", "");
+    msgEnviada = true; //Define variavel global para true para não mandar mensagem novmente a cada iteração
+  }
+}
+else{
+  digitalWrite(led3, LOW); //Apaga led para debug
+}
+
  //Função responsavel por reiniciar a contagem
 void reiniciaContagem(){
   delay(1000);
