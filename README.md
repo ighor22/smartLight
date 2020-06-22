@@ -18,6 +18,9 @@ Lista de componentes uitilizados para a construção do projeto:
 *	Jumpers Macho/Fêmea
 
 ## Software
+
+O código a seguir foi programado em C++ utilizando a ArduinoIDE
+
 ```c++
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
@@ -231,4 +234,7 @@ void callback(char* topic, unsigned char* payload, unsigned int length) {
     
 }
 ```
+
+Podemos ter uma ideia melhor de seu funcionamento ao analisar o fluxograma do aplicativo
+![Fluxograma do SmartLight](https://github.com/ighor22/smartLight/blob/master/Fluxograma%20SmartLight.png)
 
