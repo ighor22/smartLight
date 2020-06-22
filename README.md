@@ -24,7 +24,6 @@ Lista de componentes uitilizados para a construção do projeto:
 A seguir, um fluxograma especificamente para a parte da comunicação realizada pelo MQTT: 
 
 ![Fluxograma do MQTT](https://github.com/ighor22/smartLight/blob/master/Fluxograma%20MQTT.png)
-
 O código a seguir foi programado em C++ utilizando a ArduinoIDE
 
 ```c++
