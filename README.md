@@ -18,7 +18,8 @@ Lista de componentes uitilizados para a construção do projeto:
 *	Jumpers Macho/Fêmea
 
 ## Funcionamento
- O sistema funciona da seguinte maneira: O sensor PIR juntamente com o LDR verificam constantemente a il
+ O sistema funciona da seguinte maneira: O sensor PIR juntamente com o LDR verificam constantemente o nível de claridade no ambiente e se há algum tipo de presença no local. Após 15 minutos sem detectar presença nesse ambiente, o sistema envia uma mensagem via Telegram para o usuario, informando que o mesmo esqueceu a luz acesa, enviando junto um link que permite ao usuário controlar a lâmpada a distância. Esse controle da lâmpada é feito via protocolo MQTT, e utilizando o broker IBM Cloud. Para que ele não fique notificando o usuário de dia (já que vai estar iluminado naturalmente), o sistema permite que você escolha o horario em que ele deve começar a notificá-lo. Por padrão, é a partir das 19 horas.
+
 
 ## Software
  Podemos ter uma ideia melhor de seu funcionamento ao analisar o fluxograma do aplicativo:
