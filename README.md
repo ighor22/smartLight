@@ -17,6 +17,9 @@ Lista de componentes uitilizados para a construção do projeto:
 *	Jumpers Macho/Macho
 *	Jumpers Macho/Fêmea
 
+## Funcionamento
+ O sistema funciona da seguinte maneira: O sensor PIR juntamente com o LDR verificam constantemente a il
+
 ## Software
  Podemos ter uma ideia melhor de seu funcionamento ao analisar o fluxograma do aplicativo:
 
@@ -24,9 +27,9 @@ Lista de componentes uitilizados para a construção do projeto:
 A seguir, um fluxograma especificamente para a parte da comunicação realizada pelo MQTT: 
 
 ![Fluxograma do MQTT](https://github.com/ighor22/smartLight/blob/master/Fluxograma%20MQTT.png)
-O código a seguir foi programado em C++ utilizando a ArduinoIDE
+O código a seguir foi programado em C utilizando a ArduinoIDE
 
-```c++
+```c
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
