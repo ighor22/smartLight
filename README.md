@@ -28,7 +28,7 @@ Lista de componentes uitilizados para a construção do projeto:
 A seguir, um fluxograma especificamente para a parte da comunicação realizada pelo MQTT: 
 
 ![Fluxograma do MQTT](https://github.com/ighor22/smartLight/blob/master/Fluxograma%20MQTT.png)
-O código a seguir foi programado em C utilizando a ArduinoIDE
+A seguir, uma explicação do código-fonte desse projeto. Ele foi feito em C utilizando a ArduinoIDE:
 
 Iniciamos a codiificação com a inclusão de todas as bibliotecas utilizadas, para conexão com o wifi, o funcionamento do MQTT, para o uso do BOT do Telegram e configuração do horário.
 ```c
