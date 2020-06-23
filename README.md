@@ -30,6 +30,7 @@ A seguir, um fluxograma especificamente para a parte da comunicação realizada 
 ![Fluxograma do MQTT](https://github.com/ighor22/smartLight/blob/master/Fluxograma%20MQTT.png)
 O código a seguir foi programado em C utilizando a ArduinoIDE
 
+Iniciamos a codiificação com a inclusão de todas as bibliotecas utilizadas, para conexão com o wifi, o funcionamento do MQTT, para o uso do BOT do Telegram e configuração do horário.
 ```c
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
@@ -38,13 +39,18 @@ O código a seguir foi programado em C utilizando a ArduinoIDE
 #include <UniversalTelegramBot.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
-
+```
+Em seguida, configuramos o NTP: Em uma variável foi armazenado o fuso horário do Brasil, em segundos, e em um array foram armazenados os dias da semana e, com o uso de funções disponíveis na biblioteca importada, configuramos o NTP
+```c
 //Configuração NTP
 const long utcOffsetInSeconds = -10800; //Fuso horario (-3*60*60)
 char daysOfTheWeek[7][12] = {"Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sabado"};
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
+```
 
+Depois configuramos o BOT do Telegram, onde recebemos um Token, que será armazenado em uma variável e configuramos o usuário e senha do wifi, que será utilizado para conectar o Sistema.
+```c
 //Configuração Bot Telegram
 #define BOTtoken "*******************************"
 WiFiClientSecure clientBot;
@@ -53,13 +59,17 @@ UniversalTelegramBot bot(BOTtoken, clientBot);
 //Usuario e senha do WiFi
 const char *ssid = "*********";
 const char *password = "*******";
-
+```
+Configuramos o dispositivo para utilizer o Broker da IBM – Watson IOT. Ao cadastrar o dispotivo na IBM Cloud, recebemos um nome para a organização, um tipo de dispositivo, um ID e um Token que são armazenados em variáveis.
+```c
 // Dados do dispositivo no Watson Iot
 const String ORG = "*****";
 const String DEVICE_TYPE = "******";
 const char* DEVICE_ID = "******";
 #define DEVICE_TOKEN "********"
-
+```
+Definimos em variáveis os pinos utilizados para a conexão dos componentes (LED’s, PIR e o modulo Rele) e variáveis globais (um Contador e um flag).
+```c
 //Definições dos pinos utilizados 
 int led1 = 5; //pino D1
 int PIR = 15;  //pino D8
@@ -70,18 +80,24 @@ int rele = 14; //D5
 //Variaveis globais
 int contador = 0;
 boolean msgEnviada = false;
-
+```
+Na declaração das variáveis para customização, declaramos as variáveis que armazenam os valores de horário de ativação do Sistema e o tempo que o Sistema deve considerar sem presença humana no ambiente.
+```c
 //Variaveis para customização 
 int horarioAtivacao = 19; //Hora que o sistema comecará a notificar o usuário caso a luz esteja acesa
 int tempoSemPresenca = 900; // Em segundos a quantidade de tempo sem detecção de movimento no ambiente 
-
+```
+Fizemos a configuração do MQTT, onde o link de conexão recebe os valores armazenados nas variáveis declaradas na configuração do dispositivo no Broker. E declaramos o tópico da lâmpada.
+```c
 //Configurações MQTT
 const String CLIENT_ID = "d:" + ORG + ":" + DEVICE_TYPE + ":" + DEVICE_ID;
 const String MQTT_SERVER = ORG + ".messaging.internetofthings.ibmcloud.com";
 #define topicoLampada1 "iot-2/cmd/lampada1/fmt/json" //Define o topico que será inscrito
 WiFiClient wifiClient;
 PubSubClient client(MQTT_SERVER.c_str(), 1883, wifiClient);
-
+```
+No setup(), iniciamos o Serial, e declaramos os pinos como Input ou Output. Incluimos o comando para o funcionamento do Bot e a configuração do wifi, onde, a partir de um loop, são feitas as tentativas de conexão até que se obtenha sucesso.
+```c
 void setup() {
    Serial.begin(9600);   
    pinMode(led1, OUTPUT);
@@ -120,13 +136,20 @@ void setup() {
     Serial.println("Conectado ao WiFi!");
     Serial.print("Meu IP:\t");
     Serial.println(WiFi.localIP());
+ ```
+Depois de ter o wifi conectado, o Sistema irá enviar uma mensagem para o usuário que é passado na função, avisando que iniciou o Sistema. Iniciamos, então, o NTP e a conexão ao MQTT. 
+```c
+    
     //Substituir ***** pelo id do usuario no telegram
     bot.sendMessage("***********", "Iniciando sistema!", ""); //Inicio do Bot do Telegram
     timeClient.begin(); //Inicio do NTP
     connectMQTTServer(); //Conexão ao servidor MQTT
     
 }
-
+```
+Iniciando o loop(), pegamos do NTP a hora e printamos na tela. Chamamos o loop do Client, onde serão executados os métodos descritos anteriormente.
+Em seguida são lidos os valores recebidos do sensor LDR e convertidos em voltagem. Se o ambiente estiver escuro, o Contador será reiniciado e a mensagem enviada será definida para false.
+```c
 void loop() {
   
   //Atualização e print da hora atual
@@ -154,6 +177,9 @@ void loop() {
   } else{
       digitalWrite(led1, LOW); //Apaga led para debug
   }
+  ```
+  Na leitura no PIR, se for detectado movimento, o Contador será zerado e não enviará mensagem ao usuário. Caso não detecte movimento o Contador será incrementado até atingir o tempo determinado para enviar a mensagem ao usuário.
+  ```c
 
   //Realiza leitura dos dados do PIR, verificando se há movimentação no ambiente
   long state = digitalRead(PIR);
@@ -176,8 +202,9 @@ void loop() {
       Serial.println(contador);
       
 }
-
-
+```
+Logo após, teremos uma verificação se está sem detectar presença no ambiente, se tem detecção de luz e se já passa do horário determinado no Sistema. Caso as três condições sejam positivas e o Sistema ainda não tenha enviado uma mensagem ao usuário, ele envia e mostra que a enviou.
+```c
 //Verifica tempo sem movimento, nivel de claridade e horario atual. 
 if(contador >= tempoSemPresenca && voltage >1 && timeClient.getHours() >= horarioAtivacao){
   digitalWrite(led3, HIGH); //Acende led para debug
@@ -192,14 +219,18 @@ if(contador >= tempoSemPresenca && voltage >1 && timeClient.getHours() >= horari
 else{
   digitalWrite(led3, LOW); //Apaga led para debug
 }
-
+```
+Essa função reinicia a contagem, ela conta 1 segundo, zera o Contador e o flag, declarado no inicio do Código, recebe false.
+```c
  //Função responsavel por reiniciar a contagem
 void reiniciaContagem(){
   delay(1000);
   contador = 0;
   msgEnviada = false; //Define variavel global para falso para que, caso detecte a luz acesa, mande a mensagem para o usuario
 }
-
+```
+Para a conexão com o MQTT, o Sistema utilizará a URL e os dados declarados no início do Código. Caso tenha sucesso na conexão, ele irá “setar” um callback, uma função que será ativada todas as vezes que houver mudança no estado do tópico inserido, e será inscrito no tópico da lâmpada. Caso não seja possível realizar a conexão ao MQTT, o Sistema irá mostrar o erro e tentar novamente.
+```c
 //Função responsável pela conexão ao servidor MQTT
 void connectMQTTServer() {
   Serial.println("Connectando ao servidor MQTT...");
@@ -214,7 +245,11 @@ void connectMQTTServer() {
      connectMQTTServer(); //chama a função novamente para outra tentativa
   }
 }
-
+```
+A função callback recebe, entre os parâmetros, o tópico da lâmpada. Ele irá printar qual foi o tópico onde teve alteração, quando a função é chamada.
+O Sistema irá receber um JSON e irá desserializá-lo. Se tiver sucesso na desserealização, ele acessará o atributo “value“ do JSON que poderá ser 0 ou 1. O valor dessa variável será escrita na porta do Módulo Rele.
+Nesta parte do Código, fizemos uma condição pensando na inclusão de mais lâmpadas no Sistema como uma proposta para o futuro. Essa condição é responsável por verificar se o tópico passado como parâmetro é o tópico da lâmpada sobre a qual se deseja realizar alguma ação. Caso o tópico seja o mesmo, o valor da variável “value” será escrito na porta do Módulo Rele.
+```c
 //Função callback para o topico do MQTT (ativa sempre que houver alteração/mensagem)
 void callback(char* topic, unsigned char* payload, unsigned int length) {
   //Printa o topico que teve alteração
